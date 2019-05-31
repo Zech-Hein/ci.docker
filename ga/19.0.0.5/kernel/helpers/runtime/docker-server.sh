@@ -35,6 +35,21 @@ then
   fi
 fi
 
+publicCert="/etc/wlp/config/certificates/tls.crt"
+privateKey="/etc/wlp/config/certificates/tls.key"
+customkeystore="/etc/wlp/config/customKeystore/customkeystore.p12"
+customtruststore="/etc/wlp/config/customTruststore/customtruststore.p12"
+
+# If the ICP CA tls.crt and tls.key, or custom keystore and truststore exists, convert to P12 and use
+if [ -e $publicCert ] && [ -e $privateKey ] || [ -e $customkeystore ]
+then
+  echo 'debug: cert/key or customkeystore found, running script'
+  #Always generate on startup
+  /opt/ibm/helpers/runtime/gen-icp-cert.sh
+  
+  #Start inotify
+  /opt/ibm/helpers/runtime/inotify-cert.sh &
+fi
 
 # Pass on to the real server run
 exec "$@"
